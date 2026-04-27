@@ -6,19 +6,19 @@
   <meta name="theme-color" content="#0b0f14" />
   <meta name="color-scheme" content="dark" />
 
-  <title>Calc 3D</title>
+  <title>3D Print Cost</title>
 
   <!-- PWA -->
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" href="icons/icon-192.png" />
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png" />
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
 
   <!-- iOS “app-like” -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="3D Cost" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
@@ -26,14 +26,13 @@
     <div class="topbar__title">
       <span class="dot" aria-hidden="true"></span>
       <div>
-        <div class="title">Calc 3D</div>
-        <div class="subtitle">Calculadora de custo impressão 3D</div>
+        <div class="title" id="pageTitle">3D Print Cost</div>
+        <div class="subtitle" id="pageSubtitle">Calculadora de custo • Offline</div>
       </div>
     </div>
 
     <button id="btnA2HS" class="ghost" type="button" aria-label="Adicionar à Tela de Início">
       <span class="icon" aria-hidden="true">
-        <!-- share-ish icon -->
         <svg viewBox="0 0 24 24" fill="none">
           <path d="M12 3v10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
           <path d="M8.5 6.5 12 3l3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
@@ -45,156 +44,140 @@
   </header>
 
   <main class="app">
-    <section class="card">
-      <h2>Entradas</h2>
 
-      <div class="grid">
-        <label class="field">
-          <span>Valor do filamento (R$/kg)</span>
-          <input
-            id="filamentKg"
-            type="text"
-            inputmode="decimal"
-            autocomplete="off"
-            placeholder="Ex.: 99"
-            value="99"
-          />
-          <small class="helper">Dica: digite apenas o número (ex.: 99 = R$ 99,00/kg).</small>
-        </label>
+    <!-- VIEW: CALCULADORA -->
+    <section id="view-calc" class="view view--active">
+      <section class="card">
+        <h2>Entradas</h2>
 
-        <label class="field">
-          <span>Gramas utilizadas (g)</span>
-          <input
-            id="grams"
-            type="text"
-            inputmode="decimal"
-            autocomplete="off"
-            placeholder="Ex.: 120"
-          />
-        </label>
+        <div class="grid">
+          <label class="field field--full">
+            <span>Nome da peça</span>
+            <input
+              id="partName"
+              type="text"
+              autocomplete="off"
+              placeholder="Ex.: Suporte do motor, Boneco, Peça X…"
+            />
+          </label>
 
-        <label class="field">
-          <span>Horas de impressão (h)</span>
-          <input
-            id="hours"
-            type="text"
-            inputmode="decimal"
-            autocomplete="off"
-            placeholder="Ex.: 6,5"
-          />
-        </label>
+          <label class="field">
+            <span>Valor do filamento (R$/kg)</span>
+            <input id="filamentKg" type="text" inputmode="decimal" autocomplete="off" placeholder="Ex.: 99" value="99" />
+            <small class="helper">Digite apenas o número (ex.: 99 = R$ 99,00/kg).</small>
+          </label>
 
-        <label class="field">
-          <span>Consumo médio da impressora (W)</span>
-          <input
-            id="watts"
-            type="text"
-            inputmode="decimal"
-            autocomplete="off"
-            placeholder="Ex.: 65"
-            value="65"
-          />
-        </label>
+          <label class="field">
+            <span>Gramas utilizadas (g)</span>
+            <input id="grams" type="text" inputmode="decimal" autocomplete="off" placeholder="Ex.: 120" />
+          </label>
 
-        <label class="field">
-          <span>Valor do kWh (R$)</span>
-          <input
-            id="kwh"
-            type="text"
-            inputmode="decimal"
-            autocomplete="off"
-            placeholder="Ex.: 0,72"
-            value="0,72"
-          />
-        </label>
+          <label class="field">
+            <span>Horas de impressão (h)</span>
+            <input id="hours" type="text" inputmode="decimal" autocomplete="off" placeholder="Ex.: 6,5" />
+          </label>
 
-        <label class="field">
-          <span>Depreciação por hora (R$/h)</span>
-          <input
-            id="depr"
-            type="text"
-            inputmode="decimal"
-            autocomplete="off"
-            placeholder="Ex.: 0,50"
-            value="0,50"
-          />
-        </label>
+          <label class="field">
+            <span>Consumo médio da impressora (W)</span>
+            <input id="watts" type="text" inputmode="decimal" autocomplete="off" placeholder="Ex.: 65" value="65" />
+          </label>
 
-        <label class="field">
-          <span>Outros custos por peça (R$)</span>
-          <input
-            id="other"
-            type="text"
-            inputmode="decimal"
-            autocomplete="off"
-            placeholder="Ex.: 0"
-            value="0"
-          />
-          <small class="helper">Ex.: ímãs, parafusos, rolamentos, etc. (por peça).</small>
-        </label>
+          <label class="field">
+            <span>Valor do kWh (R$)</span>
+            <input id="kwh" type="text" inputmode="decimal" autocomplete="off" placeholder="Ex.: 0,72" value="0,72" />
+          </label>
 
-        <label class="field">
-          <span>Lucro (markup %)</span>
-          <input
-            id="profit"
-            type="text"
-            inputmode="decimal"
-            autocomplete="off"
-            placeholder="Ex.: 200"
-            value="200"
-          />
-        </label>
-      </div>
+          <label class="field">
+            <span>Depreciação por hora (R$/h)</span>
+            <input id="depr" type="text" inputmode="decimal" autocomplete="off" placeholder="Ex.: 0,50" value="0,50" />
+          </label>
 
-      <div class="actions">
-        <button id="btnClear" class="ghost" type="button">Limpar</button>
-      </div>
+          <label class="field">
+            <span>Outros custos por peça (R$)</span>
+            <input id="other" type="text" inputmode="decimal" autocomplete="off" placeholder="Ex.: 0" value="0" />
+            <small class="helper">Ímãs, parafusos, rolamentos, etc. (por peça).</small>
+          </label>
+
+          <label class="field">
+            <span>Lucro (markup %)</span>
+            <input id="profit" type="text" inputmode="decimal" autocomplete="off" placeholder="Ex.: 200" value="200" />
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="btnClear" class="ghost" type="button">Limpar</button>
+          <button id="btnSaveHistory" class="primary" type="button">Salvar no histórico</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Resultados</h2>
+
+        <div class="result">
+          <div class="result__row"><span>Custo do filamento</span><strong id="rFilament">R$ 0,00</strong></div>
+          <div class="result__row"><span>Custo de energia</span><strong id="rEnergy">R$ 0,00</strong></div>
+          <div class="result__row"><span>Depreciação</span><strong id="rDepr">R$ 0,00</strong></div>
+          <div class="result__row"><span>Outros custos</span><strong id="rOther">R$ 0,00</strong></div>
+
+          <div class="divider"></div>
+
+          <div class="result__row"><span>Custo total</span><strong id="rTotal" class="accent">R$ 0,00</strong></div>
+          <div class="result__row"><span>Preço de venda sugerido</span><strong id="rSale" class="good">R$ 0,00</strong></div>
+          <div class="result__row"><span>Lucro em reais</span><strong id="rProfitBRL" class="warn">R$ 0,00</strong></div>
+        </div>
+
+        <p id="hint" class="hint">
+          Preencha <strong>Gramas</strong> e <strong>Horas</strong> para calcular. Os demais campos já têm valores padrão.
+        </p>
+      </section>
     </section>
 
-    <section class="card">
-      <h2>Resultados</h2>
+    <!-- VIEW: HISTÓRICO -->
+    <section id="view-history" class="view">
+      <section class="card">
+        <h2>Histórico de consultas</h2>
+        <p class="hint">Toque em um item para ver detalhes. Você pode excluir itens individualmente.</p>
 
-      <div class="result">
-        <div class="result__row">
-          <span>Custo do filamento</span>
-          <strong id="rFilament">R$ 0,00</strong>
-        </div>
-        <div class="result__row">
-          <span>Custo de energia</span>
-          <strong id="rEnergy">R$ 0,00</strong>
-        </div>
-        <div class="result__row">
-          <span>Depreciação</span>
-          <strong id="rDepr">R$ 0,00</strong>
-        </div>
-        <div class="result__row">
-          <span>Outros custos</span>
-          <strong id="rOther">R$ 0,00</strong>
+        <div class="actions actions--between">
+          <button id="btnBackCalc" class="ghost" type="button">Voltar</button>
+          <button id="btnClearHistory" class="ghost danger" type="button">Limpar histórico</button>
         </div>
 
-        <div class="divider"></div>
+        <div id="historyList" class="list" aria-live="polite"></div>
+      </section>
 
-        <div class="result__row">
-          <span>Custo total</span>
-          <strong id="rTotal" class="accent">R$ 0,00</strong>
-        </div>
-
-        <div class="result__row">
-          <span>Preço de venda sugerido</span>
-          <strong id="rSale" class="good">R$ 0,00</strong>
-        </div>
-
-        <div class="result__row">
-          <span>Lucro em reais</span>
-          <strong id="rProfitBRL" class="warn">R$ 0,00</strong>
-        </div>
-      </div>
-
-      <p id="hint" class="hint">
-        Preencha <strong>Gramas</strong> e <strong>Horas</strong> para calcular. Os demais campos já têm valores padrão.
-      </p>
+      <section class="card">
+        <h2>Detalhes</h2>
+        <pre id="historyDetail" class="detail">Selecione um item do histórico.</pre>
+      </section>
     </section>
+
   </main>
+
+  <!-- Bottom nav (botão “Histórico” no final, estilo app) -->
+  <nav class="bottom-nav" role="navigation" aria-label="Navegação">
+    <button id="navCalc" class="navbtn navbtn--active" type="button">
+      <span class="ico" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M8 7h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M8.5 11h2M13.5 11h2M8.5 14.5h2M13.5 14.5h2M8.5 18h7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="label">Calcular</span>
+    </button>
+
+    <button id="navHistory" class="navbtn" type="button">
+      <span class="ico" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 8v5l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 12a9 9 0 1 0 3-6.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M3 4v5h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="label">Histórico</span>
+    </button>
+  </nav>
 
   <!-- Modal: Add to Home Screen -->
   <div id="modal" class="modal" aria-hidden="true">
@@ -208,18 +191,3 @@
         <li>Escolha <strong>Adicionar à Tela de Início</strong>.</li>
         <li>Confirme o nome e toque em <strong>Adicionar</strong>.</li>
       </ol>
-      <p class="hint">Dica: depois de instalado, ele abre em tela cheia e funciona offline.</p>
-      <button id="btnCloseModal" class="primary" type="button">Entendi</button>
-    </div>
-  </div>
-
-  <script src="app.js"></script>
-  <script>
-    // Service Worker (offline)
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("sw.js");
-    }
-  </script>
-</body>
-</html>
-``

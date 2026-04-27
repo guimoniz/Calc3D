@@ -2,12 +2,14 @@
  * 3D Print Cost - PWA offline
  * - Recalcula automaticamente ao digitar
  * - Salva valores no localStorage
- * - Formata moeda em pt-BR
+ * - Histórico de consultas (salvar, listar, detalhes, excluir, limpar)
  */
 
 const $ = (id) => document.getElementById(id);
 
 const el = {
+  // Inputs
+  partName: $("partName"),
   filamentKg: $("filamentKg"),
   grams: $("grams"),
   hours: $("hours"),
@@ -17,6 +19,7 @@ const el = {
   other: $("other"),
   profit: $("profit"),
 
+  // Results
   rFilament: $("rFilament"),
   rEnergy: $("rEnergy"),
   rDepr: $("rDepr"),
@@ -24,18 +27,39 @@ const el = {
   rTotal: $("rTotal"),
   rSale: $("rSale"),
   rProfitBRL: $("rProfitBRL"),
-
   hint: $("hint"),
 
+  // Buttons
   btnClear: $("btnClear"),
+  btnSaveHistory: $("btnSaveHistory"),
+
+  // Views
+  viewCalc: $("view-calc"),
+  viewHistory: $("view-history"),
+  pageTitle: $("pageTitle"),
+  pageSubtitle: $("pageSubtitle"),
+
+  // Bottom nav
+  navCalc: $("navCalc"),
+  navHistory: $("navHistory"),
+
+  // History UI
+  historyList: $("historyList"),
+  historyDetail: $("historyDetail"),
+  btnBackCalc: $("btnBackCalc"),
+  btnClearHistory: $("btnClearHistory"),
+
+  // A2HS modal
   btnA2HS: $("btnA2HS"),
   modal: $("modal"),
   btnCloseModal: $("btnCloseModal"),
 };
 
-const STORAGE_KEY = "pwa3d_cost_inputs_v1";
+const STORAGE_INPUTS = "pwa3d_cost_inputs_v2";
+const STORAGE_HISTORY = "pwa3d_cost_history_v1";
 
 const defaults = {
+  partName: "",
   filamentKg: "99",
   grams: "",
   hours: "",
@@ -45,6 +69,10 @@ const defaults = {
   other: "0",
   profit: "200",
 };
+
+function uid() {
+  return Math.random().toString(16).slice(2) + Date.now().toString(16);
+}
 
 function moneyBR(value) {
   const n = Number(value || 0);
@@ -58,26 +86,32 @@ function parseBRNumber(text) {
   if (text == null) return 0;
   const s = String(text).trim();
   if (!s) return 0;
-
-  // Remove espaços; troca vírgula por ponto; mantém dígitos e ponto e sinal
   const normalized = s.replace(/\s+/g, "").replace(",", ".");
   const n = Number(normalized);
   return Number.isFinite(n) ? n : 0;
 }
 
-function loadInputs() {
+function loadJSON(key, fallback) {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...defaults };
-    const parsed = JSON.parse(raw);
-    return { ...defaults, ...parsed };
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
   } catch {
-    return { ...defaults };
+    return fallback;
   }
+}
+
+function saveJSON(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+function loadInputs() {
+  const saved = loadJSON(STORAGE_INPUTS, null);
+  return saved ? { ...defaults, ...saved } : { ...defaults };
 }
 
 function saveInputs() {
   const payload = {
+    partName: el.partName.value,
     filamentKg: el.filamentKg.value,
     grams: el.grams.value,
     hours: el.hours.value,
@@ -87,10 +121,11 @@ function saveInputs() {
     other: el.other.value,
     profit: el.profit.value,
   };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  saveJSON(STORAGE_INPUTS, payload);
 }
 
 function setInputs(values) {
+  el.partName.value = values.partName ?? defaults.partName;
   el.filamentKg.value = values.filamentKg ?? defaults.filamentKg;
   el.grams.value = values.grams ?? defaults.grams;
   el.hours.value = values.hours ?? defaults.hours;
@@ -101,92 +136,29 @@ function setInputs(values) {
   el.profit.value = values.profit ?? defaults.profit;
 }
 
-function compute() {
-  // Inputs
-  const filamentKg = parseBRNumber(el.filamentKg.value); // R$/kg
-  const grams = parseBRNumber(el.grams.value);           // g
-  const hours = parseBRNumber(el.hours.value);           // h
-  const watts = parseBRNumber(el.watts.value);           // W
-  const kwhPrice = parseBRNumber(el.kwh.value);          // R$/kWh
-  const deprHour = parseBRNumber(el.depr.value);         // R$/h
-  const other = parseBRNumber(el.other.value);           // R$
-  const profitPct = parseBRNumber(el.profit.value);      // %
-
-  // Validations for hint text
-  const hasCore = grams > 0 && hours > 0;
-
-  // Formulas (as you specified)
-  const costFilament = (filamentKg / 1000) * grams;
-  const costEnergy = (watts / 1000) * hours * kwhPrice;
-  const costDepr = hours * deprHour;
-  const costOther = other;
-
-  const total = costFilament + costEnergy + costDepr + costOther;
-  const sale = total + (total * profitPct / 100);
-  const profitBRL = sale - total;
-
-  // Render
-  el.rFilament.textContent = moneyBR(costFilament);
-  el.rEnergy.textContent = moneyBR(costEnergy);
-  el.rDepr.textContent = moneyBR(costDepr);
-  el.rOther.textContent = moneyBR(costOther);
-  el.rTotal.textContent = moneyBR(total);
-  el.rSale.textContent = moneyBR(sale);
-  el.rProfitBRL.textContent = moneyBR(profitBRL);
-
-  if (!hasCore) {
-    el.hint.innerHTML = `Preencha <strong>Gramas</strong> e <strong>Horas</strong> para calcular. Os demais campos já têm valores padrão.`;
-  } else {
-    el.hint.textContent = "Atualizado automaticamente conforme você digita. Valores ficam salvos neste iPhone.";
-  }
+// --------------------
+// Views / Navigation
+// --------------------
+function setActiveNav(which) {
+  el.navCalc.classList.toggle("navbtn--active", which === "calc");
+  el.navHistory.classList.toggle("navbtn--active", which === "history");
 }
 
-function onAnyInput() {
-  saveInputs();
-  compute();
+function showCalcView() {
+  el.viewCalc.classList.add("view--active");
+  el.viewHistory.classList.remove("view--active");
+  el.pageTitle.textContent = "3D Print Cost";
+  el.pageSubtitle.textContent = "Calculadora de custo • Offline";
+  setActiveNav("calc");
 }
 
-function clear() {
-  setInputs({ ...defaults });
-  saveInputs();
-  compute();
+function showHistoryView() {
+  el.viewCalc.classList.remove("view--active");
+  el.viewHistory.classList.add("view--active");
+  el.pageTitle.textContent = "Histórico";
+  el.pageSubtitle.textContent = "Consultas salvas neste iPhone";
+  setActiveNav("history");
+  renderHistory();
 }
 
-function openModal() {
-  el.modal.classList.add("is-open");
-  el.modal.setAttribute("aria-hidden", "false");
-}
-
-function closeModal() {
-  el.modal.classList.remove("is-open");
-  el.modal.setAttribute("aria-hidden", "true");
-}
-
-// Init
-(function init() {
-  // Load saved values
-  const saved = loadInputs();
-  setInputs(saved);
-
-  // Recalculate on typing
-  const inputs = [
-    el.filamentKg, el.grams, el.hours, el.watts,
-    el.kwh, el.depr, el.other, el.profit
-  ];
-
-  inputs.forEach((inp) => {
-    inp.addEventListener("input", onAnyInput, { passive: true });
-    inp.addEventListener("change", onAnyInput, { passive: true });
-  });
-
-  // Clear button
-  el.btnClear.addEventListener("click", clear);
-
-  // A2HS helper modal
-  el.btnA2HS.addEventListener("click", openModal);
-  el.btnCloseModal.addEventListener("click", closeModal);
-  el.modal.querySelector(".modal__backdrop").addEventListener("click", closeModal);
-
-  // First compute
-  compute();
-})();
+// --------------------
