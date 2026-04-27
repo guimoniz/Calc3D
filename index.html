@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meu App Pessoal</title>
+
+  <!-- Manifest -->
+  manifest.json
+
+  <!-- Cor da barra -->
+  <meta name="theme-color" content="#0d6efd">
+
+  <!-- iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Meu App">
+
+</head>
+<body>
+  <h1>Meu App PWA</h1>
+  <p>Rodando no meu iPhone 🚀</p>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>
