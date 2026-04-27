@@ -1,30 +1,225 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Meu App Pessoal</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0f14" />
+  <meta name="color-scheme" content="dark" />
 
-  <!-- Manifest -->
-  manifest.json
+  <title>Calc 3D</title>
 
-  <!-- Cor da barra -->
-  <meta name="theme-color" content="#0d6efd">
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png" />
 
-  <!-- iOS -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Meu App">
+  <!-- iOS “app-like” -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="3D Cost" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
+  <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
-  <h1>Meu App PWA</h1>
-  <p>Rodando no meu iPhone 🚀</p>
 
+<body>
+  <header class="topbar">
+    <div class="topbar__title">
+      <span class="dot" aria-hidden="true"></span>
+      <div>
+        <div class="title">Calc 3D</div>
+        <div class="subtitle">Calculadora de custo impressão 3D</div>
+      </div>
+    </div>
+
+    <button id="btnA2HS" class="ghost" type="button" aria-label="Adicionar à Tela de Início">
+      <span class="icon" aria-hidden="true">
+        <!-- share-ish icon -->
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 3v10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          <path d="M8.5 6.5 12 3l3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M6 11v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="label">Instalar</span>
+    </button>
+  </header>
+
+  <main class="app">
+    <section class="card">
+      <h2>Entradas</h2>
+
+      <div class="grid">
+        <label class="field">
+          <span>Valor do filamento (R$/kg)</span>
+          <input
+            id="filamentKg"
+            type="text"
+            inputmode="decimal"
+            autocomplete="off"
+            placeholder="Ex.: 99"
+            value="99"
+          />
+          <small class="helper">Dica: digite apenas o número (ex.: 99 = R$ 99,00/kg).</small>
+        </label>
+
+        <label class="field">
+          <span>Gramas utilizadas (g)</span>
+          <input
+            id="grams"
+            type="text"
+            inputmode="decimal"
+            autocomplete="off"
+            placeholder="Ex.: 120"
+          />
+        </label>
+
+        <label class="field">
+          <span>Horas de impressão (h)</span>
+          <input
+            id="hours"
+            type="text"
+            inputmode="decimal"
+            autocomplete="off"
+            placeholder="Ex.: 6,5"
+          />
+        </label>
+
+        <label class="field">
+          <span>Consumo médio da impressora (W)</span>
+          <input
+            id="watts"
+            type="text"
+            inputmode="decimal"
+            autocomplete="off"
+            placeholder="Ex.: 65"
+            value="65"
+          />
+        </label>
+
+        <label class="field">
+          <span>Valor do kWh (R$)</span>
+          <input
+            id="kwh"
+            type="text"
+            inputmode="decimal"
+            autocomplete="off"
+            placeholder="Ex.: 0,72"
+            value="0,72"
+          />
+        </label>
+
+        <label class="field">
+          <span>Depreciação por hora (R$/h)</span>
+          <input
+            id="depr"
+            type="text"
+            inputmode="decimal"
+            autocomplete="off"
+            placeholder="Ex.: 0,50"
+            value="0,50"
+          />
+        </label>
+
+        <label class="field">
+          <span>Outros custos por peça (R$)</span>
+          <input
+            id="other"
+            type="text"
+            inputmode="decimal"
+            autocomplete="off"
+            placeholder="Ex.: 0"
+            value="0"
+          />
+          <small class="helper">Ex.: ímãs, parafusos, rolamentos, etc. (por peça).</small>
+        </label>
+
+        <label class="field">
+          <span>Lucro (markup %)</span>
+          <input
+            id="profit"
+            type="text"
+            inputmode="decimal"
+            autocomplete="off"
+            placeholder="Ex.: 200"
+            value="200"
+          />
+        </label>
+      </div>
+
+      <div class="actions">
+        <button id="btnClear" class="ghost" type="button">Limpar</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Resultados</h2>
+
+      <div class="result">
+        <div class="result__row">
+          <span>Custo do filamento</span>
+          <strong id="rFilament">R$ 0,00</strong>
+        </div>
+        <div class="result__row">
+          <span>Custo de energia</span>
+          <strong id="rEnergy">R$ 0,00</strong>
+        </div>
+        <div class="result__row">
+          <span>Depreciação</span>
+          <strong id="rDepr">R$ 0,00</strong>
+        </div>
+        <div class="result__row">
+          <span>Outros custos</span>
+          <strong id="rOther">R$ 0,00</strong>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="result__row">
+          <span>Custo total</span>
+          <strong id="rTotal" class="accent">R$ 0,00</strong>
+        </div>
+
+        <div class="result__row">
+          <span>Preço de venda sugerido</span>
+          <strong id="rSale" class="good">R$ 0,00</strong>
+        </div>
+
+        <div class="result__row">
+          <span>Lucro em reais</span>
+          <strong id="rProfitBRL" class="warn">R$ 0,00</strong>
+        </div>
+      </div>
+
+      <p id="hint" class="hint">
+        Preencha <strong>Gramas</strong> e <strong>Horas</strong> para calcular. Os demais campos já têm valores padrão.
+      </p>
+    </section>
+  </main>
+
+  <!-- Modal: Add to Home Screen -->
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal__backdrop"></div>
+    <div class="modal__sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal__handle" aria-hidden="true"></div>
+      <h3 id="modalTitle">Adicionar à Tela de Início</h3>
+      <ol class="steps">
+        <li>Abra este app no <strong>Safari</strong> (iPhone).</li>
+        <li>Toque no botão <strong>Compartilhar</strong> (quadrado com seta).</li>
+        <li>Escolha <strong>Adicionar à Tela de Início</strong>.</li>
+        <li>Confirme o nome e toque em <strong>Adicionar</strong>.</li>
+      </ol>
+      <p class="hint">Dica: depois de instalado, ele abre em tela cheia e funciona offline.</p>
+      <button id="btnCloseModal" class="primary" type="button">Entendi</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
   <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js');
+    // Service Worker (offline)
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js");
     }
   </script>
 </body>
 </html>
+``
